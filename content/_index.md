@@ -1,9 +1,9 @@
 ---
 weight: 1
-title: AWS Marketplace CA Training  Workshop 
+title: AWS Marketplace CA Workshop 
 description: 
 ---
-#### AWS Marketplace CA Training  Workshop
+#### AWS Marketplace CA Workshop
 
 [1. Building blocks]({{%relref "bldblocks.md"%}})
 
