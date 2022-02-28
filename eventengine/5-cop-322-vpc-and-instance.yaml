@@ -1,0 +1,277 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for Memory Loss Jam Challenge
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/28
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: "cop322"
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: "cop322"
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: 10.0.0.0/28
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: "cop322"
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: "cop322"
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: "{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2:21}}"
+      InstanceType: t2.micro
+      IamInstanceProfile: !Ref InstanceProfile
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          SubnetId: !Ref PublicSubnet1
+          DeviceIndex: "0"
+          GroupSet:
+            - !Ref InstanceSG
+      UserData:
+        Fn::Base64: |
+          #!/usr/bin/env bash
+          # comment out the appropriate linux version for install
+
+          # Amazon Linux
+          wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm -O /tmp/cwagent.rpm
+          # Redhat
+          # curl -o /tmp/cwagent.rpm https://s3.amazonaws.com/amazoncloudwatch-agent/redhat/amd64/latest/amazon-cloudwatch-agent.rpm
+          # SUSE
+          # wget https://s3.amazonaws.com/amazoncloudwatch-agent/suse/amd64/latest/amazon-cloudwatch-agent.rpm -O /tmp/cwagent.rpm
+          # Debian
+          # wget https://s3.amazonaws.com/amazoncloudwatch-agent/debian/amd64/latest/amazon-cloudwatch-agent.deb -O /tmp/cwagent.deb
+          # Ubuntu
+          # curl -o /tmp/cwagent.deb https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+
+          # For RPM install, uncoment next line
+          rpm -U /tmp/cwagent.rpm
+
+          # For Debian package install, uncoment next line
+          # dpkg -i -E ./cwagent.deb
+
+
+          cat > /tmp/cwconfig.json <<"EOL"
+          {
+              "agent": {
+                  "metrics_collection_interval": 60,
+                  "run_as_user": "root"
+              },
+              "metrics": {
+                  "append_dimensions": {
+                      "AutoScalingGroupName": "${aws:AutoScalingGroupName}",
+                      "ImageId": "${aws:ImageId}",
+                      "InstanceId": "{instance_id}",
+                      "InstanceType": "${aws:InstanceType}"
+                  },
+                  "metrics_collected": {
+                      "cpu": {
+                          "measurement": [
+                              "cpu_usage_idle",
+                              "cpu_usage_iowait",
+                              "cpu_usage_user",
+                              "cpu_usage_system"
+                          ],
+                          "metrics_collection_interval": 60,
+                          "totalcpu": true
+                      },
+                      "disk": {
+                          "measurement": [
+                              "used_percent",
+                              "inodes_free"
+                          ],
+                          "metrics_collection_interval": 60,
+                          "resources": [
+                              "*"
+                          ]
+                      },
+                      "diskio": {
+                          "measurement": [
+                              "io_time",
+                              "write_bytes",
+                              "read_bytes",
+                              "writes",
+                              "reads"
+                          ],
+                          "metrics_collection_interval": 60,
+                          "resources": [
+                              "*"
+                          ]
+                      },
+                      "mem": {
+                          "measurement": [
+                              "mem_used_percent"
+                          ],
+                          "metrics_collection_interval": 60
+                      },
+                      "netstat": {
+                          "measurement": [
+                              "tcp_established",
+                              "tcp_time_wait"
+                          ],
+                          "metrics_collection_interval": 60
+                      },
+                      "swap": {
+                          "measurement": [
+                              "swap_used_percent"
+                          ],
+                          "metrics_collection_interval": 60
+                      }
+                  }
+              },
+              "logs": {
+                "logs_collected": {
+                  "files": {
+                    "collect_list": [
+                      {
+                        "file_path": "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log",
+                        "log_group_name": "amazon-cloudwatch-agent.log",
+                        "log_stream_name": "{instance_id}",
+                        "timezone": "UTC"
+                      },
+                      {
+                        "file_path": "/var/log/boot.log*",
+                        "log_group_name": "/var/log/boot.log",
+                        "log_stream_name": "{instance_id}",
+                        "timezone": "UTC"
+                      },
+                      {
+                        "file_path": "/var/log/dmesg",
+                        "log_group_name": "/var/log/dmesg",
+                        "log_stream_name": "{instance_id}",
+                        "timezone": "UTC"
+                      },
+                      {
+                        "file_path": "/var/log/secure",
+                        "log_group_name": "/var/log/secure",
+                        "log_stream_name": "{instance_id}",
+                        "timezone": "UTC"
+                      },
+                      {
+                        "file_path": "/var/log/messages",
+                        "log_group_name": "/var/log/messages",
+                        "log_stream_name": "{instance_id}",
+                        "timezone": "UTC"
+                      },
+                      {
+                        "file_path": "/var/log/cron*",
+                        "log_group_name": "/var/log/cron",
+                        "log_stream_name": "{instance_id}",
+                        "timezone": "UTC"
+                      },
+                      {
+                        "file_path": "/var/log/cloud-init-output.log",
+                        "log_group_name": "/var/log/cloud-init-output.log",
+                        "log_stream_name": "{instance_id}",
+                        "timezone": "UTC"
+                      }
+                    ]
+                  }
+                }
+              }
+          }
+          EOL
+          echo "Configuring CloudWatch agent with file /tmp/cwconfig.json: "
+          cat /tmp/cwconfig.json
+          echo "starting cloudwatch agent"
+          /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/cwconfig.json -s
+          echo "creating temp file"
+          touch /tmp/copytos3.txt
+          aws s3 cp /tmp/copytos3.txt s3://reinvent-2021-cop-322-$(aws sts get-caller-identity --query Account --output text)-us-west-2
+      Tags:
+        - Key: Name
+          Value: "cop322"
+
+
+  InstanceSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Jam Challenge SG
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: "cop322"
+
+
+  OutboundAll:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      Description: allow all outgoing
+      IpProtocol: "-1"
+      CidrIp: 0.0.0.0/0
+      GroupId: !Ref InstanceSG
+
+  InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: "cop322-instance"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+
+
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: "cop322"
+      Path: "/"
+      Roles:
+        - !Ref InstanceRole
+
+Outputs:
+  InstanceID:
+    Value: !Ref EC2Instance
+    Description: The Instance ID for your EC2 instance
+    Export:
+      Name: "cop322-InstanceID"

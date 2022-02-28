@@ -1,0 +1,144 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ''
+
+Resources:
+  EventRule1:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Name: detect-IAM-changes
+      Description: >-
+        A CloudWatch Event Rule that detects changes to IAM configuration
+        and publishes change events to a CW Log Group for monitoring.
+      State: ENABLED
+      Targets:
+        - Arn: !Join [ ":", [ 'arn:aws:logs', !Ref 'AWS::Region', !Ref 'AWS::AccountId', 'log-group', '/aws/events/IAMDetect' ]]
+          Id: 1
+      EventPattern:
+        detail-type:
+          - AWS API Call via CloudTrail
+        detail:
+          eventSource:
+            - iam.amazonaws.com
+          eventName:
+            - AddClientIDToOpenIDConnectProvider
+            - AttachGroupPolicy
+            - AttachRolePolicy
+            - AttachUserPolicy
+            - AddUserToGroup
+            - CreateCustomerGateway
+            - ChangePassword
+            - CreateLoginProfile
+            - CreateAccessKey
+            - CreateOpenIDConnectProvider
+            - CreatePolicyVersion
+            - CreateSAMLProvider
+            - CreateServiceLinkedRole
+            - CreateServiceSpecificCredential
+            - CreateUser
+            - DeactivateMFADevice
+            - DeleteRole
+            - DeleteRolePermissionsBoundary
+            - DeleteSAMLProvider
+            - DeleteUser
+            - DetachGroupPolicy
+            - DetachRolePolicy
+            - DetachUserPolicy
+            - EnableMFADevice
+            - GenerateCredentialReport
+            - GenerateOrganizationsAccessReport
+            - GenerateServiceLastAccessedDetails
+            - GetCredentialReport
+            - GetOrganizationsAccessReport
+            - GetServiceLastAccessedDetails
+            - GetServiceLastAccessedDetailsWithEntities
+            - PutGroupPolicy
+            - PutRolePolicy
+            - PutUserPolicy
+            - PassRole
+            - RemoveClientIDFromOpenIDConnectProvider
+            - RemoveRoleFromInstanceProfile
+            - RemoveUserFromGroup
+            - ResetServiceSpecificCredential
+            - UpdateLoginProfile
+            - UpdateSAMLProvider
+            - UpdateAssumeRolePolicy
+            - UploadServerCertificate
+            - UploadSigningCertificate
+            - UploadSSHPublicKey
+            - SetDefaultPolicyVersion
+            - TagRole
+            - TagUser
+            - UntagRole
+            - UntagUser
+    DependsOn: LogGroup1
+  LogGroup1:
+      Type: 'AWS::Logs::LogGroup'
+      Properties: 
+        LogGroupName: '/aws/events/IAMDetect'
+        RetentionInDays: 14
+  
+  EventRule2:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Name: Forward-GuardDuty-Findings-CloudWatchLogGroup
+      Description: >-
+        A CloudWatch Event Rule that collects GuardDuty findings and publish them to a CW Log Group for monitoring.
+      State: ENABLED
+      Targets:
+        - Arn: !Join [ ":", [ 'arn:aws:logs', !Ref 'AWS::Region', !Ref 'AWS::AccountId', 'log-group', '/aws/events/GuardDutyFindings' ]]
+          Id: 1
+      EventPattern:
+        detail-type:
+          - GuardDuty Finding
+        source:
+          - aws.guardduty
+    DependsOn: LogGroup2
+  LogGroup2:
+      Type: 'AWS::Logs::LogGroup'
+      Properties: 
+        LogGroupName: '/aws/events/GuardDutyFindings'
+        RetentionInDays: 90
+  
+  EventRule3:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Name: detect-network-changes
+      Description: >-
+        A CloudWatch Event Rule that detects changes to network configuration
+        and publishes change events to a CW Log Group for monitoring.
+      State: ENABLED
+      Targets:
+        - Arn: !Join [ ":", [ 'arn:aws:logs', !Ref 'AWS::Region', !Ref 'AWS::AccountId', 'log-group', '/aws/events/NetDetect' ]]
+          Id: Id12345
+      EventPattern:
+        detail-type:
+          - AWS API Call via CloudTrail
+        detail:
+          eventSource:
+            - ec2.amazonaws.com
+          eventName:
+            - AttachInternetGateway
+            - AssociateRouteTable
+            - CreateCustomerGateway
+            - CreateInternetGateway
+            - CreateRoute
+            - CreateRouteTable
+            - DeleteCustomerGateway
+            - DeleteInternetGateway
+            - DeleteRoute
+            - DeleteRouteTable
+            - DeleteDhcpOptions
+            - DetachInternetGateway
+            - DisassociateRouteTable
+            - ReplaceRoute
+            - ReplaceRouteTableAssociation
+    DependsOn: LogGroup3
+  LogGroup3:
+    Type: 'AWS::Logs::LogGroup'
+    Properties: 
+      LogGroupName: /aws/events/NetDetect
+      RetentionInDays: 14
+
+Parameters: {}
+Metadata: {}
+Conditions: {}
