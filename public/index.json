@@ -1,44 +1,79 @@
 [
 {
+	"uri": "/bldblocks/",
+	"title": "1. Building Blocks - AWS Services",
+	"tags": [],
+	"description": "Introduction to the frequently asked AWS Services by MP Customers.",
+	"content": "AWS Marketplace CA Training Workshop A. Using your own Isengard accounts\nB. AWS IAM 101\nC. AWS Organizations 101\nD. AWS Service Catalog 101\nE. How to run this workshop\n"
+},
+{
+	"uri": "/bldblocks/isengard/",
+	"title": "A. Isengard Accounts (for internal use only)",
+	"tags": [],
+	"description": "Isengard accounts for internal use.",
+	"content": ""
+},
+{
 	"uri": "/",
 	"title": "AWS Marketplace CA Training  Workshop",
 	"tags": [],
 	"description": "",
-	"content": "AWS Marketplace CA Training Workshop 1. Building blocks\n2. Customer Journey\n3. Billing and cost management for AWS MP products\n4. ADX 101\n5. ML 101\n6. Get Help Resources\n"
-},
-{
-	"uri": "/bldblocks/",
-	"title": "Building Blocks",
-	"tags": [],
-	"description": "Introduction to the frequently asked AWS Services by MP Customers.",
-	"content": ""
+	"content": "AWS Marketplace CA Training Workshop 1. Building blocks\n2. Customer Journey\n3. Billing and cost management for AWS MP products\n4. ADX 101\n5. ML 101\nGet Help Resources\nCA Rampup Guide - Please check this internal wiki for all the resources you need for ramp up.\n"
 },
 {
 	"uri": "/cust_journey/",
-	"title": "An AWS Marketplace Customer Journey",
+	"title": "2. An AWS Marketplace Customer Journey",
 	"tags": [],
 	"description": "A Customer journey with hands on labs.",
 	"content": ""
 },
 {
+	"uri": "/bldblocks/iam/",
+	"title": "B. AWS IAM - 101",
+	"tags": [],
+	"description": "IAM constructs that you need to be aware of.",
+	"content": ""
+},
+{
 	"uri": "/billing/",
-	"title": "Billing for AWS Marketplace",
+	"title": "3. Billing for AWS Marketplace",
 	"tags": [],
 	"description": "Billing and Cost Management for AWS Marketplace",
 	"content": ""
 },
 {
+	"uri": "/bldblocks/orgs/",
+	"title": "C. AWS Organizations - 101",
+	"tags": [],
+	"description": "AWS Organization Constructs to be aware of in AWS Marketplace Context.",
+	"content": ""
+},
+{
 	"uri": "/ml/",
-	"title": "ML Marketplace 101",
+	"title": "4. ML Marketplace 101",
 	"tags": [],
 	"description": "Things to know about ML Marketplace.",
 	"content": ""
 },
 {
+	"uri": "/bldblocks/sc/",
+	"title": "D. AWS Service Catalog - 101",
+	"tags": [],
+	"description": "AWS Service Catalog Constructs to be aware of in AWS Marketplace Context.",
+	"content": ""
+},
+{
 	"uri": "/adx/",
-	"title": "ADX 101",
+	"title": "5. ADX 101",
 	"tags": [],
 	"description": "Things to know about ADX.",
+	"content": ""
+},
+{
+	"uri": "/bldblocks/howto/",
+	"title": "E. How to run this workshop",
+	"tags": [],
+	"description": "Instructions on how to run this workshop.",
 	"content": ""
 },
 {
