@@ -1,5 +1,5 @@
 ---
-weight: 3
-title: AWS Identity and Access Management (IAM) - 101
-description: IAM Constructs to be aware of in AWS Marketplace Context.
+weight: 2
+title: B. AWS IAM - 101
+description: IAM constructs that you need to be aware of.
 ---

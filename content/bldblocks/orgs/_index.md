@@ -1,5 +1,5 @@
 ---
 weight: 3
-title: AWS Organizations - 101
-description: All you need to learn about AWS Organizations.
+title: C. AWS Organizations - 101
+description: AWS Organization Constructs to be aware of in AWS Marketplace Context.
 ---

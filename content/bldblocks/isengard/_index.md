@@ -1,5 +1,5 @@
 ---
 weight: 1
-title: Using Isengard Accounts
-description: Step by step instructions on using Isengard Accounts.
+title: A. Isengard Accounts (for internal use only)
+description: Isengard accounts for internal use.
 ---
